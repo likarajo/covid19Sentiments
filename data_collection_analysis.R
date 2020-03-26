@@ -18,10 +18,10 @@ library(mapdata)
 # Store API keys/tokens
 token <- rtweet::create_token(
   app = "COVID19",
-  consumer_key <- "K84vFz3AgKTdWnnnHqAeW9LSJ",
-  consumer_secret <- "a02zgGUTE8fIe564FB7IiHLZA8RBupFEch56uPKG9sn9fctzQD",
-  access_token <- "2390269165-IkElqrvtb2fH6fQwlH9yV7BN4aZNOdJtOG4SjCn",
-  access_secret <- "DQAsk7p7FLY9RSHKKnyflQYi0xuTeU3U8AHd3ysqUDWbA")
+  consumer_key <- "xxxx",
+  consumer_secret <- "xxxx",
+  access_token <- "xxxx",
+  access_secret <- "xxxx")
 
 ## Check keys/tokens
 rtweet::get_token()
