@@ -1,21 +1,21 @@
-## Sample program for analyzing sentiments in Twitter data
-# Prepare needed packages
+## Analyzing Coronavirus sentiments in Twitter
 
+# Prepare needed packages
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tm,tidyverse,data.table)
+library(tm)
+library(tidyverse)
+library(data.table)
 
 # Import data
-cortx <- read.csv("coronatx032320.csv", stringsAsFactors = FALSE)
+cortx <- read.csv("data/corona_0325.csv", stringsAsFactors = FALSE)
 
-# Focus on text column and tokenize
-
+# Tokenize text
 twttextDF <- data_frame(text=cortx$text)
 tidytwt= twttextDF %>% 
   unnest_tokens(word, text)
 
 # Call in the stop word dictionary
-# library(tm)
-# library(data.table)
 data(stop_words)
 
 ## Adding "trump" as stop word
@@ -43,7 +43,6 @@ tidytwt <- tidytwt %>%
 # Sentiment analysis
 # On average one tweet has 12 words.
 # Plotting spread of sentiments
-
 sentiment_CTT <- tidytwt %>%          
   inner_join(get_sentiments("bing")) %>%
   count(index = linenumber %/% 12, sentiment) %>%
@@ -53,7 +52,6 @@ ggplot(sentiment_CTT, aes(index, sentiment)) +
   geom_col(show.legend = FALSE)+theme_bw()
 
 # Plotting the positive and negative words
-
 bing_word_counts %>%
   group_by(sentiment) %>%
   top_n(10) %>%
@@ -74,4 +72,5 @@ bing_word_counts %>%
 ggsave("CT_2020_sentiments.svg", device=svg, dpi=600)
 
 # Save data before exit
-save.image("CT_03232020all.RData")
+save.image("CT.RData")
+

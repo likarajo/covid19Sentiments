@@ -1,91 +1,75 @@
-## Social Data Collection and Analytics: Corona virus data collection
-# R rtweet package by Michael Kearney
-# https://mkearney.github.io/nicar_tworkshop/#1
-# R textblob package 
-# https://github.com/news-r/textblob
+## Corona virus data collection
 
-# Prepare needed packages
-
+# Install packages
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(rtweet, ggmap, tidyverse, datatable, maps, mapdata)
+pacman::p_load(rtweet, ggmap, igraph, tidyverse, ggraph, ggplot2, data.table, maps, mapdata)
 
-#install.packages("rtweet")
-#library(rtweet)
-#library(ggplot2)
-#library(ggmap)  # Google map now requires API key
+# Load packages
+library(rtweet)
+library(ggmap) # Google map now requires API key
+library(igraph)
+library(tidyverse)
+library(ggraph)
+library(ggplot2)
+library(data.table)
+library(maps)
+library(mapdata)
 
+# Store API keys/tokens
 token <- rtweet::create_token(
-  app = "Your App name",
-  consumer_key <- "YOURCONSUMERKEY",
-  consumer_secret <- "YOURCONSUMERSECRET",
-  access_token <- "YOURACCESSTOKEN",
-  access_secret <- "YOURACCESSSECRET")
-  
-## Check token
+  app = "COVID19",
+  consumer_key <- "K84vFz3AgKTdWnnnHqAeW9LSJ",
+  consumer_secret <- "a02zgGUTE8fIe564FB7IiHLZA8RBupFEch56uPKG9sn9fctzQD",
+  access_token <- "2390269165-IkElqrvtb2fH6fQwlH9yV7BN4aZNOdJtOG4SjCn",
+  access_secret <- "DQAsk7p7FLY9RSHKKnyflQYi0xuTeU3U8AHd3ysqUDWbA")
 
+## Check keys/tokens
 rtweet::get_token()
 
 ## User search
-# Experiment: search for the instructor's twitter account and follow him
+#rdt_user <- rtweet::search_users(q = "realDonaldTrump", n = 1000)
+#rdt_fn <- lookup_users("realDonaldTrump")
+#rdt_f <- get_followers("realDonaldTrump", n = rdt_fn$followers_count, retryonratelimit = TRUE)
 
-txdshs_fn <- lookup_users("TexasDSHS")
+## Query Search for coronavirus
+cvrs <- rtweet::search_tweets("Coronavirus OR coronavirus OR COVID19 OR covid19, lang:en", 
+                              n = 500, retryonratelimit = TRUE)
 
-# Get all his followers' ID
-txdshs_f <- get_followers("TexasDSHS", n = txdshs_fn$followers_count, retryonratelimit = TRUE)
-
-## Real search for Trump
-rdt <- rtweet::search_tweets(
-  "Trump OR president OR potus", n = 10000,
-  retryonratelimit = TRUE
-)
-rdt_fn <- lookup_users("realDonaldTrump")
-
-rdt_user <- rtweet::search_users(q = "realDonaldTrump", n = 1000)
-
-rdt_q <- rtweet::search_tweets(q = "realDonaldTrump", n = 10000, lang = "en")
-
-
-# Get followers of user "realDonaldTrump"
-# Beware, could take very long time (>5 days)
-# rdt_f <- get_followers("realDonaldTrump", n = rdt_fn$followers_count, retryonratelimit = TRUE)
-#
-ts_plot(rdt, by = "mins") + theme_bw()
+## Time series plot
+ts_plot(cvrs, by = "mins") + theme_bw()
   
 ## Keyword search
 
 cvrs0 <- search_tweets("COVID19TX OR coronavirustexas OR coronavirustx", geocode = lookup_coords("USA"), n=5000)
 
 # Setting language: English (en) , Chinese (zh), Korean (ko), Spanish (es)
-cvrs_e <- search_tweets("coronavirus,lang:en",geocode = lookup_coords("usa"), n=10000)
-
-cvrs_k <- search_tweets("coronavirus,lang:ko",geocode = lookup_coords("usa"), n=10000)
-cvrs_c <- search_tweets("coronavirus,lang:zh",geocode = lookup_coords("usa"), n=10000)
+cvrs_en <- search_tweets("coronavirus,lang:en",geocode = lookup_coords("usa"), n=10000)
+cvrs_ko <- search_tweets("coronavirus,lang:ko",geocode = lookup_coords("usa"), n=10000)
+cvrs_ch <- search_tweets("coronavirus,lang:zh",geocode = lookup_coords("usa"), n=10000)
 cvrs_US <- search_tweets("coronavirus,lang:en",geocode = lookup_coords("usa"), n=10000, retryonratelimit = TRUE)
-
-cvrs_US2 <- search_tweets("coronavirus,lang:en",geocode = lookup_coords("usa"), n=30000, retryonratelimit = TRUE)
-cvrs_dallas <- search_tweets("COVID19,lang:en",geocode = dallas, n=1000)
-
-# Needs Google API key for geocode 
-# Visit https://cloud.google.com/maps-platform/ for API key
-
-geocode("Dallas")
-cvrs_london <- search_tweets("COVID19,lang:en",geocode = lookup_coords("London"), n=1000)
 
 # Use geocode to locate tweets
 cvrs_dallas <- search_tweets("COVID19,lang:en",geocode = "32.8,-96.8,20mi", n=1000)
+
 dallas=lookup_coords("Dallas, TX", "country:US")
+cvrs_dallas <- search_tweets("coronavirus,lang:en",geocode = dallas, n=1000)
+
+cvrs_london <- search_tweets("coronavirus,lang:en",geocode = lookup_coords("London"), n=1000)
+
+# Needs Google API key for geocode 
+# Visit https://cloud.google.com/maps-platform/ for API key
+geocode("Dallas")
 
 # Create lat/lng variables using all available tweet and profile geo-location data
 # Note: not all tweets have geo-location data
-
 cvrs0 <- lat_lng(cvrs0)  
 cvrs_dallas <- lat_lng(cvrs_dallas)
-cvrs_US2 <- lat_lng(cvrs_US2)  
+cvrs_US2 <- lat_lng(cvrs_US2) 
+
+
 ## plot tweet locations onto state map
 # set boundaries for state map
-
 ## Map data on US map
-
 par(mar = c(0, 0, 0, 0))
 maps::map("state", lwd = .4)
 with(cvrs_US2, points(lng, lat, pch = 20, cex = .60, col ="red"))
@@ -104,13 +88,10 @@ tx_base <- ggplot(data = tx_df, mapping = aes(x = long, y = lat)) +
   coord_fixed(1.2) + 
   geom_polygon(color = "black", fill = "white")
 
-
 tx_base + theme_bw() + 
   geom_point(data = cvrs_dallas, mapping = aes(x = lng, y = lat), color = "red",lwd = .4)
 
-
 # Sentiment analysis using TextBlob
-
 pacman::p_load(remotes,reticulate)
 
 # Install from github (development source)
