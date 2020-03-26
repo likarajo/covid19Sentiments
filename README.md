@@ -1,4 +1,4 @@
-# Analysisng COVID-19
+# Analysing COVID-19
 
 ## Outline
 
@@ -8,24 +8,6 @@
 2. R Studio >= 1.2
 3. Python >= 3.6
 4. Anaconda
-
-### Strategy
-
-* Social media data is huge.
-  * 250m tweets per day on Twitter.
-  * Facebook and Instagram have higher volume depending ion content.
-* Decision based on
-  * Purpose of project.
-  * Resources
-    * Cloud
-    * PC
-  * Time
-
-### Why Twitter
-
-* Facebook limits its API and collection of data.
-* Instagram is also limited.
-* **Twitter has open policy and is popular among researchers**.
 
 ### Social Media Data Collection
 
@@ -62,160 +44,58 @@ Covid Tracking Projects: https://covidtracking.com
 #coronaviruscalifornia
 ```
 
-# Social Media Data Collection and Analytics
+---
 
-## I. Using API Method to collect Twitter data
+## Data Collection
 
-Acquire API key and token from [Twitter developer website](http://dev.twitter.com) 
-1. Login using your Twitter account (create one if none exists)
-2. Click on Apps, create an app and apply for a developer account.  Give detail on your purpose (e.g. personal research)
-
-Sample description:
-
-1. Using API to conduct public opinion research.
-2. Analyze Tweet contents, trends and transactional data in social networks.
-3. Focus on Tweeting, favorites/likes, following and retweeting will be involved
-4. Aggregate data will be presented to the public and reviewing agency targeting publications in academic journals and presentations in academic conferences.
-
-Once approved, Twitter will provide API detail in four keys/secret/tokens. Open an R session and store the API data:
+### I. Non-API Method using Python
 
 ```
-## Create token for direct authentication to access Twitter data
-
-token <- rtweet::create_token(
-  app = "Your App name",
-  consumer_key <- "YOURCONSUMERKEY",
-  consumer_secret <- "YOURCONSUMERSECRET",
-  access_token <- "YOURACCESSTOKEN",
-  access_secret <- "YOURACCESSSECRET")
-
-## Check token
-
-rtweet::get_token()
+Twitter API has limits which vary over time and currently allows one week's data. Some packages allow to collect historical Twitter data. 
 ```
+Package used here: [GetOldTweets3](https://pypi.org/project/GetOldTweets3/) 
+* [Jefferson Henrique](https://github.com/Jefferson-Henrique/GetOldTweets-python)
+* [Dimtry Mottl](https://github.com/Mottl/GetOldTweets3) 
 
+This non-API method scrapes Twitter data based on Twitter search results by parsing the result page with a scroll loader, then calling to a JSON provider. While theoretically it can search through oldest tweets and collect data accordingly, the number of variables are limited to the layout of search results.
 
-With API methods, there are plenty of R packages for collecting Twitter data.  Examples include twitteR, vosonSML and rtweet.  The following illustration uses rtweet, which gives most detail in twitter variables (> 90). 
-
-```
-## Install packages need for Twitter data download
-
-install.packages(c("rtweet","igraph","tidyverse","ggraph","data.table"), repos = "https://cran.r-project.org")
-
-## Load packages
-
-library(rtweet)
-library(igraph)
-library(tidyverse)
-library(ggraph)
-library(data.table)
-
-## Search for 1,000 tweets in English
-# Not run: 
-rdt <- rtweet::search_tweets(q = "realDonaldTrump", n = 1000, lang = "en")
-# End(Not run)
-
-## preview users data
-users_data(rdt)
-
-## Boolean search for large quantity of tweets (which could take a while)
-rdt <- rtweet::search_tweets(
-  "Trump OR president OR potus", n = 10000,
-  retryonratelimit = TRUE
-)
-
-## plot time series of tweets frequency
-ts_plot(rdt, by = "mins")
-```
-
-# ![time series](https://raw.githubusercontent.com/datageneration/smdca/master/twittertimeseries.png)
-
-
-
-
-
-
-
-
-
-## II. Using non-API Method to collect Twitter data
-
-Twitter API is not without limits. These limits vary over time and it currently allows one week's data.  Some packages can reach data within a shorter period due to data size.  Other methods have been developed to collect historical Twitter data.  [Jefferson Henrique](https://github.com/Jefferson-Henrique/GetOldTweets-python) and [Dimtry Mottl](https://github.com/Mottl/GetOldTweets3) python packages are illustrated here.  This non-API method scrapes Twitter data based on Twitter search results by parsing the result page with a scroll loader, then calling to a JSON provider. While theoretically it can search through oldest tweets and collect data accordingly, the number of variables are limited to the layout of search results.
-
-Prerequesites: 
-
-1. Python3
-2. Bash/terminal command line tool
-3. Python pip package installer
-
-Illustration using [GetOldTweets3](https://pypi.org/project/GetOldTweets3/) in MacOS
-Install Python 3.x (e.g. Anaconda3) and run the following preparation steps (creating virtual environment, install GetOldTweets3 package using pip):
-```
+1. Creating virtual environment and install *GetOldTweets3* package using pip
+```bash
 python3 -m venv env
 source ./env/bin/activate 
 python3 -m pip install GetOldTweets3
 ```
 
 Alternatively, 
-
-```
+```bash
 pip3 install -e git+https://github.com/Mottl/GetOldTweets3#egg=GetOldTweets3
 ```
 
-There are two methods of collecting Twitter data.  The GetOldTweets3 command method is recommended since the data collection process can be time-consuming.
-
-Examples:
-
-```
+2. Collecting Twitter data.
+```bash
 ## Keyword search
-GetOldTweets3 --querysearch "Trump Kim" --since 2018-01-01 --until 2019-01-16 --output trumpkim.csv
+GetOldTweets3 --querysearch "Coronavirus" --since 2020-02-01 --until 2020-03-25 --output data/corona_0325.csv
 
 ## username search with time period and size limit
-
-GetOldTweets3 --username "realDonaldTrump" --since 2016-11-01 --until 2020-02-29 --maxtweets 20000 --output rdt_2016_now.csv
+GetOldTweets3 --username "realDonaldTrump" --since 2020-02-01 --until 2020-03-25 --maxtweets 20000 --output data/corona_0325_rdt.csv
 ```
 
-The following procedures are for Windows users (Python2.x or Python 3.x):
+### II. API Method using R
 
-Prerequisites
-
-1. Python installed
-  - Install  Anaconda Navigator (http://anaconda.com) 
-  - Install Python from python.org
-
-2. Visit the following github by Nickson Weng and download the Python package Get-Old_Tweet-Modified
-
-https://github.com/NicksonWeng/Get-Old-Tweet-Modified
-
-a. Click on the "Clone or Download" green button on right side
-b. Download ZIP to local folder (e.g. c:\\Twitterdata)
-c. Unzip the files to the folder
-
-2. Open a terminal windows by typing terminal in the "Type here to search" box. Choose the Command Prompt App
-
-3. Change directory to c:\\Twitterdata
-4. Type:
-
-pip install -r requirements.txt
-
-Perform search using the following criteria (username or keyword)
-
-
-Examples:
-
-```{bash eval=FALSE, include=TRUE}
-## Keyword search
-python Exporter.py --querysearch "coronavirus" --maxtweets 100 --output coronavirus.csv
-
-# Get Twitter data by username
-python Exporter.py --username "realDonaldTrump" --maxtweets 100 --output dt_100.csv
-
-# Get Twitter data by keyword search, with dates and geographic location
-python Exporter_py3.py --querysearch "coronavirus" --since 2020-02-01 --until 2020-02-28 --near "Dallas, TX" --maxtweets 1000 --output coronavirus_1000.csv
+1. Acquire API key and token from [Twitter developer website](https://dev.twitter.com) 
+2. Install and load the required R package(s) for collecting and vizualizing Twitter data. Examples: *rtweet, twitteR, vosonSML*. *rtweet* gives most detail in twitter variables (> 90). 
 ```
+rtweet, ggmap, igraph, tidyverse, ggraph, ggplot2, data.table, maps, mapdata
+```
+3. Store and check the API keys/tokens
+4. Check token
+5. Search using query
+6. Preview data
+7. Time series plot
 
+---
 
-## III. Sentiment analysis using TextBlob
+## Sentiment analysis using TextBlob
 
 ```
 install.packages("remotes")
@@ -232,9 +112,10 @@ head(ctext)
 csent=text_blob(cvrs$text)
 ```
 
+---
+
 ## IV. Network analysis
 ![](https://raw.githubusercontent.com/datageneration/smdca/master/Retweet_coronavirus.png)
-
 
 ```
 ## Create igraph object from Twitter data using user id and mentioned id.
@@ -257,6 +138,5 @@ ggraph(rdt_g, layout = 'kk') +
   theme_graph(base_family="Apple Garamond") +
   theme(legend.position="none") 
 ```
-
 
 To explore the network structure of the Twitter data, [igraph](http://kateto.net/networks-r-igraph) and [ggraph](https://www.data-imaginist.com/2017/ggraph-introduction-layouts/) packages are recommended for network plots 
