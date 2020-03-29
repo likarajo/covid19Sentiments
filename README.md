@@ -4,7 +4,7 @@ Using Twitter data to perform sentiment analysis on the tweets on the COVID-19 v
 
 ## Background
 
-The recent Cornovirus COVID-19 has created a global emergency demanding social distancing, working from home, and self quarantining to control the spread of the virus. As a result, in my spare time I decided to explore how people are reacting and talking about the pandemic online.
+The recent Coronavirus COVID-19 has created a global emergency demanding social distancing, working from home, and self quarantining to control the spread of the virus. As a result, in my spare time I decided to explore how people are reacting and talking about the pandemic online.
 
 ## Data
 
