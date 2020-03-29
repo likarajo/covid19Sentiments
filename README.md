@@ -30,9 +30,8 @@ More Specific
 
 ### I. Non-API Method of data collection using Python3
 
-```
 Twitter API has limits which vary over time and currently allows one week's data. Some packages allow to collect historical Twitter data. 
-```
+
 Package used here: [GetOldTweets3](https://pypi.org/project/GetOldTweets3/) 
 * [Jefferson Henrique](https://github.com/Jefferson-Henrique/GetOldTweets-python)
 * [Dimtry Mottl](https://github.com/Mottl/GetOldTweets3) 
