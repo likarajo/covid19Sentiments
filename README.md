@@ -1,54 +1,34 @@
-# COVID-19 Sentiments
+# COVID-19 Sentiment Analysis
 
-## Outline
+Using Twitter data to perform sentiment analysis on the tweets on the COVID-19 virus.
 
-### Software
+## Background
 
-1. R >= 3.6
-2. R Studio >= 1.2
-3. Python >= 3.6
-4. Anaconda
-
-### Social Media Data Collection
-
-* **API method**: Using username and API tokens - R (*rtweet*)
-* **Non API method**: Using keyword query search - Python (*GetOldTweets3*)
-
-### Social Media Data Analysis
-
-* Sentiment analysis
-* Network analysis
-
----
+The recent Cornovirus COVID-19 has created a global emergency demanding social distancing, working from home, and self quarantining to control the spread of the virus. As a result, in my spare time I decided to explore how people are reacting and talking about the pandemic online.
 
 ## Data
 
-### Source
-
-John Hopkins University CSSE [Novel Coronavirus (COVID-19) Cases data](https://systems.jhu.edu/research/public-health/ncov/): https://github.com/CSSEGISandData/COVID-19
-
-### Tracking
-
-Covid Tracking Projects: https://covidtracking.com
+For this project, 10000 tweets with the "COVID-19" related keywords between March 20 to March 28 in 2020 were fetched for analysis.
 
 ### Keywords
 
+Generic
 ```
 #COVID19
 #covid19
 #coronavirus
 #CoronaVirus
+```
+
+More Specific
+```
 #coronavirustexas
 #Coronavirustexas
 #coronavirusnewyork
 #coronaviruscalifornia
 ```
 
----
-
-## Data Collection
-
-### I. Non-API Method using Python
+### I. Non-API Method of data collection using Python3
 
 ```
 Twitter API has limits which vary over time and currently allows one week's data. Some packages allow to collect historical Twitter data. 
@@ -59,7 +39,7 @@ Package used here: [GetOldTweets3](https://pypi.org/project/GetOldTweets3/)
 
 This non-API method scrapes Twitter data based on Twitter search results by parsing the result page with a scroll loader, then calling to a JSON provider. While theoretically it can search through oldest tweets and collect data accordingly, the number of variables are limited to the layout of search results.
 
-1. Creating virtual environment and install *GetOldTweets3* package using pip
+1. Creating virtual environment (optional) and install *GetOldTweets3* package using pip
 ```bash
 python3 -m venv env
 source ./env/bin/activate 
@@ -72,12 +52,18 @@ pip3 install -e git+https://github.com/Mottl/GetOldTweets3#egg=GetOldTweets3
 ```
 
 2. Collecting Twitter data.
+
+[GetOldTweets3](https://github.com/Mottl/GetOldTweets3)
+
 ```bash
 ## Keyword search
-GetOldTweets3 --querysearch "Coronavirus" --since 2020-02-01 --until 2020-03-25 --output data/corona_0325.csv
-
-## username search with time period and size limit
-GetOldTweets3 --username "realDonaldTrump" --since 2020-02-01 --until 2020-03-25 --maxtweets 20000 --output data/corona_0325_rdt.csv
+GetOldTweets3 
+  --querysearch "COVID19 covid19 Coronavirus coronavirus" 
+  --lang en 
+  --since 2020-03-20 
+  --until 2020-03-28
+  --maxtweets 10000 
+  --output data/corona_0320_0327.csv
 ```
 
 ### II. API Method using R
@@ -95,48 +81,33 @@ rtweet, ggmap, igraph, tidyverse, ggraph, ggplot2, data.table, maps, mapdata
 
 ---
 
-## Sentiment analysis using TextBlob
+## Sentiment Analysis
 
-```
-install.packages("remotes")
-library(reticulate)
-# Install from github (development source)
-remotes::install_github("news-r/textblob")
-library(textblob)
-# Download corpora
-textblob::download_corpora() 
-TG=text_blob("President Trump is nice guy.")
-TG$sentiment
-ctext=cvrs$text
-head(ctext)
-csent=text_blob(cvrs$text)
-```
+### Preprocessing
+
+1. The Twitter data obtained is converted to a data frame.
+2. The text of the tweets is tokenized, i.e. broken into words. Each row is split such that there is one token (word) in each row of the new data frame.
+3. The stopwords are removed from the data.
+4. The typical keywords are removed from the data.
+5. Sentiment words from the ***Bing Lexicon*** are used for analysing the tweet words.
+
+### Visualization
+
+**Most commonly used words in the tweets**
+
+![common_words](common_words.png)
+
+**Word cloud of the Sentiment words in the tweets**
+
+![sentiment_words](sentiment_words.png)
+
+**Classification of the Sentiment words in the tweets**
+
+![sentiment_words_class](sentiment_words_class.png)
 
 ---
 
-## IV. Network analysis
-![](https://raw.githubusercontent.com/datageneration/smdca/master/Retweet_coronavirus.png)
+## Insights
 
-```
-## Create igraph object from Twitter data using user id and mentioned id.
-## ggraph draws the network graph in different layouts (12). 
-filter(rdt, retweet_count > 0 ) %>% 
-  select(screen_name, mentions_screen_name) %>%
-  unnest(mentions_screen_name) %>% 
-  filter(!is.na(mentions_screen_name)) %>% 
-  graph_from_data_frame() -> rdt_g
-V(rdt_g)$node_label <- unname(ifelse(degree(rdt_g)[V(rdt_g)] > 20, names(V(rdt_g)), "")) 
-V(rdt_g)$node_size <- unname(ifelse(degree(rdt_g)[V(rdt_g)] > 20, degree(rdt_g), 0)) 
-ggraph(rdt_g, layout = 'kk') + 
-  geom_edge_arc(edge_width=0.1, aes(alpha=..index..)) +
-  geom_node_label(aes(label=node_label, size=node_size),
-                  label.size=0, fill="#ffffff66", segment.colour="light blue",
-                  color="red", repel=TRUE, family="Apple Garamond") +
-  coord_fixed() +
-  scale_size_area(trans="sqrt") +
-  labs(title="Tweets about Trump", subtitle="Edges=volume of retweets. Screenname size=influence") +
-  theme_graph(base_family="Apple Garamond") +
-  theme(legend.position="none") 
-```
-
-To explore the network structure of the Twitter data, [igraph](http://kateto.net/networks-r-igraph) and [ggraph](https://www.data-imaginist.com/2017/ggraph-introduction-layouts/) packages are recommended for network plots 
+Overall, the tweets convey a mixed, but slightly optimistic sentiment - with the relatively high frequency of words such as "positive", "safe", "relief", "support".
+The most frequent words are related to "lockdown", "health", "stayhome", "deaths" stood out among the other words, which suggests that people are talking more about the health and deaths, are much more concerned about the measure to deal with it.
